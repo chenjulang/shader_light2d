@@ -1,0 +1,98 @@
+// Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.  
+
+// Note: Current format version is experiment, the format may be changed.
+// The future format may not be compatible, you may need to update the script manually.
+
+// 注意：当前版本的格式是实验性的，之后还会进行修改。
+// 后续版本的格式不保证兼容当前格式，可能需要手动升级到最新版本。，
+%{
+  techniques: [
+    {
+      passes: [
+        {
+          vert: vs
+          frag: fs
+          cullMode: none
+          blend: true
+        }
+      ]
+      layer: 0
+    }
+  ]
+  properties: {
+    texture: {
+      type: sampler2D
+      value: null
+    }
+    color: {
+      type: color4
+      displayName:'颜色'
+      value: [1, 1, 1, 1]
+    }
+    time:{
+    type:float,
+    value:.0
+    }
+    iResolution:{
+      type:vec3,
+      displayName:'分辨率'
+      value:[1280,720,0]
+    }
+  }
+%}
+
+%% vs {
+
+precision highp float;
+
+#define PI 3.14159265359
+#define TWOPI 6.28318530718
+
+uniform mat4 cc_matViewProj;
+attribute vec3 a_position;
+attribute vec2 a_uv0;
+varying vec2 uv0;
+void main () {
+    vec4 pos = cc_matViewProj * vec4(a_position, 1);
+    gl_Position = pos;
+    uv0 = a_uv0;
+}
+
+}
+
+%% fs {
+
+precision highp float;
+
+#define TWO_PI 6.28318530718
+#define PI 3.141592653
+
+uniform vec3 iResolution;
+uniform float time;
+uniform sampler2D texture;
+uniform vec4 color;
+varying vec2 uv0;
+
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+  vec2 iMouse = vec2(0.5,0.5);//兼容变量
+  float iTime = time;//兼容变量
+  //vec2 uv = vec2(uv0.x-.5,1.-uv0.y-.5);
+      vec2 uv = vec2(uv0.x,1.-uv0.y);
+  //vec3 col = vec3(0.);
+
+
+
+  vec2 m = vec2(0.5,0.5);
+  float t = sin(length(m-uv)*12.+iTime);
+
+	fragColor = vec4(vec3(t),1.0);
+}
+
+
+
+void main () {
+  mainImage(gl_FragColor,uv0);
+}
+
+}

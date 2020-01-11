@@ -1,0 +1,180 @@
+// Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.  
+
+// Note: Current format version is experiment, the format may be changed.
+// The future format may not be compatible, you may need to update the script manually.
+
+// 注意：当前版本的格式是实验性的，之后还会进行修改。
+// 后续版本的格式不保证兼容当前格式，可能需要手动升级到最新版本。，
+%{
+  techniques: [
+    {
+      passes: [
+        {
+          vert: vs
+          frag: fs
+          cullMode: none
+          blend: true
+        }
+      ]
+      layer: 0
+    }
+  ]
+  properties: {
+    texture: {
+      type: sampler2D
+      value: null
+    }
+    texture2: {
+      type: sampler2D
+      value: null
+    }
+    texture3: {
+      type: sampler2D
+      value: null
+    }
+    color: {
+      type: color4
+      displayName:'颜色'
+      value: [1, 1, 1, 1]
+    }
+    time:{
+    type:float,
+    value:.0
+    }
+    iResolution:{
+      type:vec3,
+      displayName:'分辨率'
+      value:[1280,720,0]
+    }
+  }
+%}
+
+%% vs {
+
+precision highp float;
+
+#define PI 3.14159265359
+#define TWOPI 6.28318530718
+#define PI2 6.28318530718
+
+
+
+uniform mat4 cc_matViewProj;
+attribute vec3 a_position;
+attribute vec2 a_uv0;
+varying vec2 uv0;
+void main () {
+    vec4 pos = cc_matViewProj * vec4(a_position, 1);
+    gl_Position = pos;
+    uv0 = a_uv0;
+}
+
+}
+
+%% fs {
+
+precision highp float;
+
+#define PI2 6.28318530718
+
+uniform vec3 iResolution;
+uniform float time;
+uniform sampler2D texture;
+uniform sampler2D texture2;
+uniform sampler2D texture3;
+uniform vec4 color;
+varying vec2 uv0;
+#define S(a, b, t) smoothstep(a, b, t)
+#define MAX_ITER 5.
+
+
+////////////////////////////////////
+vec3 DrawSmoothstep(vec2 uv){
+    float val = smoothstep(0.0,1.0,uv.x);
+    val = step(abs(val-uv.y),0.001); 
+    return vec3(val,val,val);
+}
+vec4 DrawCircle(vec2 uv){
+    float x = sin(uv.y);
+    x=0.;
+    float y = sin(time)*4.;
+
+    float maxLength = .15;
+    float val = (maxLength-length(uv-vec2(x,y)));
+    vec2 dir = uv - vec2(x,y);
+    val = smoothstep(maxLength-0.1,maxLength,val);
+    return vec4(val,val,val,dir);
+}
+vec3 DrawFlower(vec2 uv){
+    float _Time = time;//兼容变量
+
+    float deg = atan(uv.y,uv.x)  ;
+    float len = length(uv);
+    float offs = abs(sin(deg));
+    return vec3(smoothstep(1.+offs,1.+offs-0.05,len));
+}
+float Wave(float layer,vec2 uv,float val){
+    float _Time = time;//兼容变量
+
+    float amplitude =  layer*layer*0.00004;//这些数值都是为了美术效果  怎么漂亮怎么来
+    float frequency = val*200.*uv.x/layer;
+    float phase = 9.*layer+ _Time/val;
+    return amplitude*sin(frequency+phase); 
+}
+
+vec3 CausticTriTwist(vec2 uv,float time )
+{
+    vec2 p = mod(uv*PI2,PI2 )-250.0;//1.空间划分
+
+    vec2 i = vec2(p);
+    float c = 1.0;
+    float inten = .005;
+
+    for (float n = 0.; n < MAX_ITER; n++) //3.多层叠加
+    {
+        float t = time * (1.0 - (3.5 / (n+1.)));
+        i = p + vec2(cos(t - i.x) + sin(t + i.y), sin(t - i.y) + cos(t + i.x));//2.空间扭曲
+        c += 1.0/length(vec2(p.x / (sin(i.x+t)/inten),p.y / (cos(i.y+t)/inten)));//集合操作avg
+    }
+    
+    c /= MAX_ITER;
+    c = 1.17-pow(c, 1.4);//4.亮度调整
+    float val = pow(abs(c), 8.0);
+    return vec3(val);
+}
+
+void main()
+{
+  vec2 uv = vec2(uv0.x,1.-uv0.y);
+  uv -= .5;
+  uv.y += .2;
+  float _Time = time;//兼容变量
+
+  uv *= 8.;
+  vec3 col = vec3(0.);
+  //vec4 data = DrawCircle(uv); 
+  
+
+  float x = sin(time);
+  float y = sin(time);
+
+  float maxLength = .2;
+  float len = (length(uv-vec2(x,y)));
+  vec2 dir = uv - vec2(x,y);
+  float gap = 0.19;
+  float middle = gap/5.;
+  float val = smoothstep(maxLength-gap,maxLength-middle,len)-smoothstep(maxLength-middle,maxLength,len);
+
+  vec2 offs;
+  offs = vec2(pow(val/10.,2.)*2.);
+
+  col = texture2D(texture, uv0+offs).rgb;
+  gl_FragColor = vec4(col, 1.);
+}
+
+  //-1/10*x^2+1/10
+  // pow(x-1.,2.)
+
+
+
+}

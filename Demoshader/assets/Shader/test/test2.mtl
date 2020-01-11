@@ -1,0 +1,27 @@
+{
+  "__type__": "cc.Material",
+  "_name": "",
+  "_objFlags": 0,
+  "_native": "",
+  "_effectAsset": {
+    "__uuid__": "c2657391-9a93-48cb-abba-cd91b3703145"
+  },
+  "_defines": {},
+  "_props": {
+    "texture": {
+      "__uuid__": "41df2c3e-c543-4f93-a5f1-78d40575b35b"
+    },
+    "texture2": {
+      "__uuid__": "88816e5d-78a9-4339-a513-7f438b8f5fc0"
+    },
+    "texture3": {
+      "__uuid__": "b260d0de-34a8-4e1b-8960-8a8f47647ba0"
+    },
+    "iResolution": {
+      "__type__": "cc.Vec3",
+      "x": 1280,
+      "y": 720,
+      "z": 0
+    }
+  }
+}

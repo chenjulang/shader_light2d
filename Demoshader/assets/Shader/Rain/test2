@@ -1,0 +1,86 @@
+%{
+  techniques: [
+    {
+      passes: [
+        {
+          vert: vs
+          frag: fs
+          cullMode: none
+          blend: true
+        }
+      ]
+      layer: 0
+    }
+  ]
+  properties: {
+    texture: {
+      type: sampler2D
+      value: null
+    }
+    color: {
+          type: color4
+          displayName:'颜色'
+          value: [1, 1, 1, 1]
+    },
+    texSize:{
+      type:vec2,
+      displayName:'图片大小'
+      value:[1280,720]
+    },
+    iResolution:{
+      type:vec3,
+      displayName:'分辨率'
+      value:[1280,720,0]
+    },
+    time:{
+    type:float,
+    value:1.0
+    }
+  }
+%}
+
+%% vs {
+precision highp float;
+  uniform mat4 cc_matViewProj;
+  attribute vec3 a_position;
+  attribute vec2 a_uv0;
+  varying vec2 uv0;
+  void main () {
+      vec4 pos = cc_matViewProj * vec4(a_position, 1);
+      gl_Position = pos;
+      uv0 = a_uv0;
+  }
+}
+
+%% fs {
+precision highp float;
+
+#define S(a, b, t) smoothstep(a, b, t)
+//#define CHEAP_NORMALS
+
+uniform sampler2D texture;
+uniform vec4 color;
+uniform vec3 iResolution;
+uniform vec2 texSize;
+uniform float time;
+varying vec2 uv0;
+
+void main()
+{
+    float t = time;  
+
+    vec2 aspect = vec2 (5.,5.);
+    vec2 uv = uv0*1.*aspect;//垂直于平面的向量
+
+    vec2 gv = fract(uv)-0.5;//最大值0.5的垂直向量,产生循环。【-0.5,0.5】
+
+    float w = uv0.y *1.;
+
+    vec2 dropPos = (gv)/aspect;
+    float drop = S(.1,.0,length(dropPos));
+    
+    vec3 col = vec3(drop,drop,drop);
+
+    gl_FragColor = vec4(col, 1.);
+}
+}

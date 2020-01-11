@@ -1,0 +1,79 @@
+%{
+  techniques: [
+    {
+      passes: [
+        {
+          vert: vs
+          frag: fs
+          cullMode: none
+          blend: true
+        }
+      ]
+      layer: 0
+    }
+  ]
+  properties: {
+    texture: {
+      type: sampler2D
+      value: null
+    }
+    color: {
+          type: color4
+          displayName:'颜色'
+          value: [1, 1, 1, 1]
+    },
+    texSize:{
+      type:vec2,
+      displayName:'图片大小'
+      value:[1280,720]
+    },
+    iResolution:{
+      type:vec3,
+      displayName:'分辨率'
+      value:[1280,720,0]
+    },
+    time:{
+    type:float,
+    value:1.0
+    }
+  }
+%}
+
+%% vs {
+precision highp float;
+  uniform mat4 cc_matViewProj;
+  attribute vec3 a_position;
+  attribute vec2 a_uv0;
+  varying vec2 uv0;
+  void main () {
+      vec4 pos = cc_matViewProj * vec4(a_position, 1);
+      gl_Position = pos;
+      uv0 = a_uv0;
+  }
+}
+
+%% fs {
+precision highp float;
+
+#define S(a, b, t) smoothstep(a, b, t)
+//#define CHEAP_NORMALS
+
+uniform sampler2D texture;
+uniform vec4 color;
+uniform vec3 iResolution;
+uniform vec2 texSize;
+uniform float time;
+varying vec2 uv0;
+
+void main()
+{
+    vec2 uv = uv0;
+    float t = time;
+
+    vec2 origin = vec2(.0,.0);
+    float d = length(uv-origin);
+    
+    vec3 col = texture2D(texture, uv).rgb;
+    gl_FragColor = vec4(col, 1.);
+}
+}

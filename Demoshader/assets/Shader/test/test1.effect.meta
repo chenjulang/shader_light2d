@@ -1,0 +1,11 @@
+{
+  "ver": "1.0.15",
+  "uuid": "17b28a19-88b1-4f25-8408-419c497721fd",
+  "compiledShaders": [
+    {
+      "vert": "\n#define _IS_VERT_SHADER 1\n\nprecision highp float;\n\nuniform mat4 cc_matViewProj;\nattribute vec3 a_position;\nattribute vec2 a_uv0;\nvarying vec2 uv0;\nvoid main () {\n    vec4 pos = cc_matViewProj * vec4(a_position, 1);\n    gl_Position = pos;\n    uv0 = a_uv0;\n}\n\n\n",
+      "frag": "\n#define _IS_FRAG_SHADER 1\n\nprecision highp float;\n\nuniform float time;\nuniform sampler2D texture;\nuniform vec4 color;\nvarying vec2 uv0;\n\nvoid mainImage( out vec4 fragColor, in vec2 fragCoord )\n{\n    vec2 uv = fragCoord;\n    vec4 tex = texture2D(texture,uv);\n    tex.r *= abs(sin(time));\n    tex.g *= abs(cos(time));\n    tex.b *= abs(sin(time)+cos(time));\n\n    fragColor = vec4(tex.rgb,tex.a);\n}\n\nvoid main () {\n  \n    mainImage(gl_FragColor, uv0.xy);\n}\n\n\n"
+    }
+  ],
+  "subMetas": {}
+}

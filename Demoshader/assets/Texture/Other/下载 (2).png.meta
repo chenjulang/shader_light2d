@@ -1,0 +1,32 @@
+{
+  "ver": "2.3.1",
+  "uuid": "b260d0de-34a8-4e1b-8960-8a8f47647ba0",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "premultiplyAlpha": false,
+  "platformSettings": {},
+  "subMetas": {
+    "下载 (2)": {
+      "ver": "1.0.4",
+      "uuid": "d22b91cc-29a8-4024-9d21-266f15eae144",
+      "rawTextureUuid": "b260d0de-34a8-4e1b-8960-8a8f47647ba0",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 120,
+      "height": 65,
+      "rawWidth": 120,
+      "rawHeight": 65,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}
