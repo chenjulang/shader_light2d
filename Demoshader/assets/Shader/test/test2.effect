@@ -73,77 +73,122 @@ uniform sampler2D texture;
 uniform vec4 color;
 varying vec2 uv0;
 
-float sphereSDF(vec2 p, float size) {
-	return length(p) - size;
+float line(float x,float k,float b){
+  return k*x+b;
 }
+int Cross(vec2 point1,vec2 point2,vec2 point3,vec2 point4){
+  vec2 temp = point2-point1;
+  float k = temp.y/temp.x;
+  float b = point2.y-point2.x*k;////
+  vec2 temp2 = point4-point3;
+  float k2 = temp2.y/temp2.x;
+  float b2 = point4.y-point4.x*k2;
 
-float boxSDF(vec2 p, vec2 size) {
-	vec2 r = abs(p) - size;
-    return min(max(r.x, r.y),0.) + length(max(r,vec2(0,0)));
+  float h1 = point3.y- line(point3.x,k,b);
+  float h2 = point4.y-line(point4.x,k,b);
+  float h3 = point1.y-line(point1.x,k2,b2);
+  float h4 = point2.y-line(point2.x,k2,b2);
+  if(h1*h2<=0.&&h3*h4<=0.){
+    return 1;
+  }else{
+    return 0;
+  }
 }
+// int Inline(vec2 center,vec2 point,vec2 newpoint){//判断某点在直线上（一定距离内）
+//   vec2 temp = center-point;
+//   float k = temp.y/temp.x;
+//   //y=kx+b;
+//   float b = point.y-point.x*k;
+  
+//   float dir = (newpoint.y-point.y);
+//   float dir2 = (center.y-point.y);
 
-vec3 colormap(float x) {
-    float s = sin(x*6.28);
-    if (x > 0.) {
-    	return vec3(1,1,1.+s)/2.;
-    } else {
-        return vec3(1,1.+s,1)/2.;
-    }
-}
+//   float dir3 = (newpoint.x-point.x);
+//   float dir4 = (center.x-point.x);
 
-void AddObj(inout float dist, inout vec3 color, float d, vec3 c) {
-    if (dist > d) {
-        dist = d;
-        color = c;
-    }
-}
+//   if(abs(newpoint.y-line(newpoint.x,k,b))<0.003 && (dir*dir2<0.&&dir3*dir4<0.)){
+//     return 1;
+//   }else{
+//     return 0;
+//   }
+// }
+// int Aboveline(vec2 center,vec2 point,vec2 newpoint){//判断某点在直线上方
+//   vec2 temp = center-point;
+//   float k = temp.y/temp.x;
+//   //y=kx+b;
+//   float b = point.y-point.x*k;
 
-void scene(in vec2 pos, out vec3 color, out float dist) {
-    dist = 1e9; color = vec3(0,0,0);
-    AddObj(dist, color, boxSDF(pos - vec2(-3,1), vec2(1,1)), vec3(.6,.8,1.));
-    AddObj(dist, color, sphereSDF(pos - vec2(3,1), 1.), vec3(1,.9,.8));
-    AddObj(dist, color, sphereSDF(pos - vec2(.3*sin(time),-2), 0.5), vec3(0,.1,0));
-    AddObj(dist, color, boxSDF(pos - vec2(0,1), vec2(1.5,0.1)), vec3(.3,.1,.1));
-}
+//   float y = newpoint.x*k+b;
+//   if(newpoint.y>=y){
+//     return 1;
+//   }else{
+//     return -1;
+//   }
+// }
 
-void trace(vec2 p, vec2 dir, out vec3 c) {
-    for (int i=0;i>-1;i++) {
-        float d;
-        scene(p, c, d);
-        if (d < 1e-3) return;
-        if (d > 1e1) break;
-        p += dir * d;
-    }
-    c = vec3(0,0,0);
-}
-
-float random (in vec2 _st) {
-    return fract(sin(dot(_st.xy,
-        vec2(12.9898,78.233)))*
-        43758.5453123);
-}
-
-#define SAMPLES 128
 
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
-     float iTime = time;//兼容变量
-      vec2 uv = vec2(uv0.x,1.-uv0.y);
-    uv-=.5;
-    uv*=30.;
+    float iTime = time;//兼容变量
+    vec2 uv = vec2(uv0.x,1.-uv0.y);
+    //float multi = 2.;
+    
+    //uv-=.1;
+    uv*=1.;
+    vec3 col = vec3(.0);
+     vec2 center = vec2(.5,.6);
+    //vec2 center = vec2(sin(time)/3.+.5,cos(time)/3.+.5);
 
-    // Normalized pixel coordinates (from 0 to 1)
-    //vec2 uv = (fragCoord-(iResolution.xy/2.))/iResolution.y*10.;
-    vec3 col = vec3(0,0,0);
-    for (int i = 0; i < SAMPLES; i++) {
-        float t = (float(i) + random(uv+float(i)+iTime)) / float(SAMPLES) * 2. * 3.1415;
-        vec3 c;
-        trace(uv, vec2(cos(t), sin(t)), c);
-        col += c;
+    vec2 point1 = vec2(.3,.3);
+    vec2 point2 = vec2(.6,.31);
+
+    vec2 point3 = vec2(.1,.1);
+    vec2 point4 = vec2(.7,.2);
+  
+    vec2 pointsArr[4];
+    pointsArr[0]=point1;
+    pointsArr[1]=point2;
+    pointsArr[2]=point3;
+    pointsArr[3]=point4;
+
+
+    int black = 0;
+    // vec2 dir = point2-point1;
+    // const int step = 100;
+    // for(int i=0;i<step;i++){
+    //   vec2 unit = dir/float(step);
+    //   vec2 testpoint= point1+unit*float(i);
+    // 1对uv        1 对center位置
+    // -1          -1
+    // int black1 = (Aboveline(point1,point3,uv))*(Aboveline(point1,point3,center))<0?1:0;
+    //判断某两点是否在直线的一上一下
+    // int black2 = (Aboveline(point2,point4,uv))*(Aboveline(point2,point4,center))<0?1:0;
+    // int black3 = (Aboveline(point1,point2,uv))*(Aboveline(point1,point2,center))<0?1:0;
+    // black = black1+black2+black3;
+
+    for(int i=0;i<4;i++){
+      for(int j=0;j<4;j++){
+        if(j>i){
+              if(Cross(uv,center,pointsArr[i],pointsArr[j])==1){
+                black =1;
+              }
+        }
+        else{};
+      }
     }
-    col /= float(SAMPLES);
-    // Output to screen
-    fragColor = vec4(col*2.,1.0);
+
+    
+
+
+    //cross交叉则为black
+
+
+    float len = length(uv-center);
+    float res = 1. - smoothstep(.0,.5,len);
+
+    res -= float(black)*.9;
+    col = vec3(res);
+    fragColor = vec4(col,1.0);
 }
 
 

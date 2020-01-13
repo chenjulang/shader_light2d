@@ -18,7 +18,7 @@ export default class ShaderTime extends cc.Component {
     private _setShaderTime(dt) {
         let start = this._start;
         if (start > 65535) start = 0;
-        start += 0.1;
+        start += 0.01;
         this._material.effect.setProperty('time', start);
 
         this._start = start;
